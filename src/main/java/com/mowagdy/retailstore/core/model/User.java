@@ -15,9 +15,7 @@ public class User {
     @Column(name = "user_type")
     private UserType userType;
 
-    @OneToMany(mappedBy = "user",
-//            orphanRemoval = true,
-            cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Bill> bills;
 
     @Column(name = "registered_at")

@@ -15,6 +15,11 @@ public class UserCreationRequest {
     public UserCreationRequest() {
     }
 
+    public UserCreationRequest(String name, UserType userType) {
+        this.name = name;
+        this.userType = userType;
+    }
+
     public String getName() {
         return name;
     }
