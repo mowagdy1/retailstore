@@ -18,8 +18,8 @@ public class UserCreationUseCase extends BaseUseCase<UserCreationResponse> {
 
     @Override
     void validate() {
-        new FieldRequiredValidator<>(request.getName(), "name").validate();
-        new FieldRequiredValidator<>(request.getUserType(), "userType").validate();
+        new FieldRequiredValidator<>(request.getName(), "name").validateOrThrow();
+        new FieldRequiredValidator<>(request.getUserType(), "userType").validateOrThrow();
     }
 
     @Override

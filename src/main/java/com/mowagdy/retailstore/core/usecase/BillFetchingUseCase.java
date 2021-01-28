@@ -19,7 +19,7 @@ public class BillFetchingUseCase extends BaseUseCase<BillFetchingResponse> {
 
     @Override
     void validate() {
-        new FieldRequiredValidator<>(request.getId(), "id").validate();
+        new FieldRequiredValidator<>(request.getId(), "id").validateOrThrow();
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.mowagdy.retailstore.core.dto.BillCreationRequest;
 import com.mowagdy.retailstore.core.dto.BillCreationRequestItem;
 import com.mowagdy.retailstore.core.dto.BillCreationResponse;
 import com.mowagdy.retailstore.core.exception.ResourceNotFoundException;
+import com.mowagdy.retailstore.core.factory.BillCalculatorFactory;
 import com.mowagdy.retailstore.core.model.Bill;
 import com.mowagdy.retailstore.core.model.BillItem;
 import com.mowagdy.retailstore.core.model.ItemType;
@@ -13,7 +14,6 @@ import com.mowagdy.retailstore.infrastructure.repo.UserRepository;
 import com.mowagdy.retailstore.core.validator.FieldRequiredValidator;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class BillCreationUseCase extends BaseUseCase<BillCreationResponse> {
@@ -30,12 +30,12 @@ public class BillCreationUseCase extends BaseUseCase<BillCreationResponse> {
 
     @Override
     void validate() {
-        new FieldRequiredValidator<>(request.getUserId(), "userId").validate();
+        new FieldRequiredValidator<>(request.getUserId(), "userId").validateOrThrow();
         for (BillCreationRequestItem item : request.getItems()) {
-            new FieldRequiredValidator<>(item.getType(), "item.type").validate();
-            new FieldRequiredValidator<>(item.getName(), "item.name").validate();
-            new FieldRequiredValidator<>(item.getSingleItemPrice(), "item.singleItemPrice").validate();
-            new FieldRequiredValidator<>(item.getQuantity(), "item.quantity").validate();
+            new FieldRequiredValidator<>(item.getType(), "item.type").validateOrThrow();
+            new FieldRequiredValidator<>(item.getName(), "item.name").validateOrThrow();
+            new FieldRequiredValidator<>(item.getSingleItemPrice(), "item.singleItemPrice").validateOrThrow();
+            new FieldRequiredValidator<>(item.getQuantity(), "item.quantity").validateOrThrow();
         }
     }
 
@@ -76,44 +76,12 @@ public class BillCreationUseCase extends BaseUseCase<BillCreationResponse> {
 
     private double calculateNetPayable(User user, List<BillItem> items, Double totalPrice) {
 
-        double percentageBasedDiscount = this.calculatePercentageBasedDiscount(user, items);
+        BillCalculatorFactory factory = new BillCalculatorFactory(user, items);
+        double percentageBasedDiscount = factory.getBillCalculator().calculatePercentageBasedDiscount();
+
         long valueBasedDiscount = this.calculateValueBasedDiscount();
 
         return totalPrice - (percentageBasedDiscount + valueBasedDiscount);
-    }
-
-    private double calculatePercentageBasedDiscount(User user, List<BillItem> items) {
-
-        double discount = 0;
-
-        for (BillItem item : items) {
-            if (item.getType() != ItemType.GROCERIES) {
-
-                double priceOfItem = item.getSingleItemPrice() * item.getQuantity();
-                double discountOfItem = 0.0;
-
-                switch (user.getUserType()) {
-                    case EMPLOYEE:
-                        discountOfItem = priceOfItem * 0.30;
-                        break;
-                    case AFFILIATE:
-                        discountOfItem = priceOfItem * 0.10;
-                        break;
-                    case CUSTOMER: {
-                        Date twoYearsAgo = new Date(System.currentTimeMillis() - (365L * 24L * 60L * 60L * 1000L));
-                        if (user.getRegisteredAt().before(twoYearsAgo)) {
-                            discountOfItem = priceOfItem * 0.05;
-                        }
-                        break;
-                    }
-                    default:
-                        discountOfItem = 0;
-                }
-
-                discount += discountOfItem;
-            }
-        }
-        return discount;
     }
 
     private long calculateValueBasedDiscount() {

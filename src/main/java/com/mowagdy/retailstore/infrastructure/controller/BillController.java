@@ -16,12 +16,6 @@ public class BillController {
     @Autowired
     private BillService billService;
 
-//    @GetMapping("")
-//    public @ResponseBody
-//    Iterable<Bill> getAllBills() {
-//        return billService.getBills();
-//    }
-
     @GetMapping("/{id}")
     public @ResponseBody
     BillFetchingResponse getSingleBill(@PathVariable("id") long id) {

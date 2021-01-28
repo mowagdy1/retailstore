@@ -13,7 +13,7 @@ public class FieldRequiredValidator<T> implements BaseValidator {
     }
 
     @Override
-    public void validate() throws FieldRequiredException {
+    public void validateOrThrow() throws FieldRequiredException {
 
         boolean result = false;
 
